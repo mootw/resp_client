@@ -15,28 +15,28 @@ void main() {
   test('tests (de)serialize of a simple string', () async {
     final simpleString = RespSimpleString('abcØØhehe');
     streamController.add(simpleString.serialize());
-    final result = await deserializeRespType(streamReader);
+    final result = await serializeObject(streamReader);
     expect(result.payload, equals('abcØØhehe'));
   });
 
   test('tests (de)serialize of a bulk string', () async {
     final simpleString = RespBulkString('abcØØhehe');
     streamController.add(simpleString.serialize());
-    final result = await deserializeRespType(streamReader);
+    final result = await serializeObject(streamReader);
     expect(result.payload, equals('abcØØhehe'));
   });
 
   test('tests (de)serialize of an error', () async {
     final simpleString = RespError('abcØØhehe');
     streamController.add(simpleString.serialize());
-    final result = await deserializeRespType(streamReader);
+    final result = await serializeObject(streamReader);
     expect(result.payload, equals('abcØØhehe'));
   });
 
   test('tests (de)serialize of an integer', () async {
     final simpleString = RespInteger(1910);
     streamController.add(simpleString.serialize());
-    final result = await deserializeRespType(streamReader);
+    final result = await serializeObject(streamReader);
     expect(result.payload, equals(1910));
   });
 
@@ -48,7 +48,7 @@ void main() {
       RespError('error'),
     ]);
     streamController.add(simpleString.serialize());
-    final result = await deserializeRespType(streamReader) as RespArray;
+    final result = await serializeObject(streamReader) as RespArray;
     expect(result.payload, hasLength(4));
     expect(result.payload?[0].payload, equals(1910));
     expect(result.payload?[1].payload, equals('bülk'));

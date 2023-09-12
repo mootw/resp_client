@@ -9,24 +9,26 @@ class RespClient {
   final Queue<Completer> _pendingResponses = Queue();
   bool _isProccessingResponse = false;
 
-  RespClient(this._connection) : _streamReader = StreamReader(_connection.inputStream);
+  RespClient(this._connection)
+      : _streamReader = StreamReader(_connection.inputStream);
 
   ///
-  /// Writes a RESP type to the server using the
+  /// Writes a Object to the server using the
   /// [outputSink] of the underlying server connection and
-  /// reads back the RESP type of the response using the
+  /// reads back the Object of the response using the
   /// [inputStream] of the underlying server connection.
+  /// the type of the response will vary. see: types.dart
   ///
-  Future<RespType> writeType(RespType data) {
-    final completer = Completer<RespType>();
+  Future<Object?> sendObject(Object data) {
+    final completer = Completer<Object?>();
     _pendingResponses.add(completer);
-    _connection.outputSink.add(data.serialize());
+    _connection.outputSink.add(serializeObject(data));
     _processResponse(false);
     return completer.future;
   }
 
-  Stream<RespType> subscribe() {
-    final controller = StreamController<RespType>();
+  Stream<Object?> subscribe() {
+    final controller = StreamController<Object?>();
     deserializeRespType(_streamReader).then((response) {
       controller.add(response);
     });

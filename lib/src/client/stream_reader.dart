@@ -5,10 +5,10 @@ class StreamReader {
   final controller = StreamController<void>.broadcast();
 
   StreamReader(Stream<List<int>> stream) {
-    stream.listen(onData);
+    stream.listen(_onData);
   }
 
-  void onData(List<int> data) {
+  void _onData(List<int> data) {
     buffer.addAll(data);
     controller.add(null);
   }

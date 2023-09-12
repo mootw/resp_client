@@ -1,261 +1,115 @@
 part of resp_client;
 
-const String suffix = '\r\n';
+class RespBulkString {
+  Iterable<int>? bytes;
 
-///
-/// Base class for all RESP types.
-///
-abstract class RespType<P> {
-  final String prefix;
-  final P payload;
-
-  const RespType._(this.prefix, this.payload);
-
-  ///
-  /// Serializes this type to RESP.
-  ///
-  List<int> serialize() {
-    return utf8.encode('$prefix$payload$suffix');
-  }
-
-  @override
-  String toString() {
-    return utf8.decode(serialize());
-  }
-
-  ///
-  /// The name of the concrete type.
-  ///
-  String get typeName;
-
-  ///
-  /// Calls one of the given handlers based on the
-  /// concrete type. Returns [true] if a handler for
-  /// the concrete type was provided, otherwise [false]
-  /// is returned. If the handler throws an error while
-  /// executing, the error is raised to the caller of
-  /// this method.
-  ///
-  T handleAs<T>({
-    T Function(RespSimpleString)? simple,
-    T Function(RespBulkString)? bulk,
-    T Function(RespInteger)? integer,
-    T Function(RespArray)? array,
-    T Function(RespError)? error,
-  }) {
-    if (isSimpleString && simple != null) {
-      return simple(toSimpleString());
-    } else if (isBulkString && bulk != null) {
-      return bulk(toBulkString());
-    } else if (isInteger && integer != null) {
-      return integer(toInteger());
-    } else if (isArray && array != null) {
-      return array(toArray());
-    } else if (isError && error != null) {
-      return error(toError());
-    }
-    throw ArgumentError('No handler provided for type $typeName!');
-  }
-
-  ///
-  /// Converts this type to a simple string. Throws a
-  /// [StateError] if this is not a simple string.
-  ///
-  RespSimpleString toSimpleString() => throw StateError('${toString()} is not a simple string!');
-
-  ///
-  /// Converts this type to a bulk string. Throws a
-  /// [StateError] if this is not a bulk string.
-  ///
-  RespBulkString toBulkString() => throw StateError('${toString()} is not a bulk string!');
-
-  ///
-  /// Converts this type to an integer. Throws a
-  /// [StateError] if this is not an integer.
-  ///
-  RespInteger toInteger() => throw StateError('${toString()} is not an integer!');
-
-  ///
-  /// Converts this type to an array. Throws a
-  /// [StateError] if this is not an array.
-  ///
-  RespArray toArray() => throw StateError('${toString()} is not an array!');
-
-  ///
-  /// Converts this type to an error. Throws a
-  /// [StateError] if this is not an error.
-  ///
-  RespError toError() => throw StateError('${toString()} is not an error!');
-
-  ///
-  /// Return [true] if this type is a simple string.
-  ///
-  bool get isSimpleString => false;
-
-  ///
-  /// Return [true] if this type is a bulk string.
-  ///
-  bool get isBulkString => false;
-
-  ///
-  /// Return [true] if this type is an integer.
-  ///
-  bool get isInteger => false;
-
-  ///
-  /// Return [true] if this type is an array.
-  ///
-  bool get isArray => false;
-
-  ///
-  /// Return [true] if this type is an error.
-  ///
-  bool get isError => false;
+  RespBulkString(this.bytes);
 }
 
-///
-/// Implementation of a RESP simple string.
-///
-class RespSimpleString extends RespType<String> {
-  const RespSimpleString(String payload) : super._('+', payload);
-
-  @override
-  RespSimpleString toSimpleString() => this;
-
-  @override
-  bool get isSimpleString => true;
-
-  @override
-  String get typeName => 'simple string';
-}
-
-///
-/// Implementation of a RESP bulk string.
-///
-class RespBulkString extends RespType<String?> {
-  static final nullString = utf8.encode('\$-1$suffix');
-
-  const RespBulkString(String? payload) : super._('\$', payload);
-
-  @override
-  List<int> serialize() {
-    final pl = payload;
-    if (pl != null) {
-      final length = utf8.encode(pl).length;
-      return utf8.encode('$prefix${length}$suffix$pl$suffix');
-    }
-    return nullString;
-  }
-
-  @override
-  RespBulkString toBulkString() => this;
-
-  @override
-  bool get isBulkString => true;
-
-  @override
-  String get typeName => 'bulk string';
-}
-
-///
-/// Implementation of a RESP integer.
-///
-class RespInteger extends RespType<int> {
-  const RespInteger(int payload) : super._(':', payload);
-
-  @override
-  RespInteger toInteger() => this;
-
-  @override
-  bool get isInteger => true;
-
-  @override
-  String get typeName => 'integer';
-}
-
-///
-/// Implementation of a RESP array.
-///
-class RespArray extends RespType<List<RespType>?> {
-  static final nullArray = utf8.encode('\*-1$suffix');
-
-  const RespArray(List<RespType>? payload) : super._('*', payload);
-
-  @override
-  List<int> serialize() {
-    final pl = payload;
-    if (pl != null) {
-      return [
-        ...utf8.encode('$prefix${pl.length}$suffix'),
-        ...pl.expand((element) => element.serialize()),
-        ...utf8.encode('$suffix'),
-      ];
-    }
-    return nullArray;
-  }
-
-  @override
-  RespArray toArray() => this;
-
-  @override
-  bool get isArray => true;
-
-  @override
-  String get typeName => 'array';
-}
-
-///
 /// Implementation of a RESP error.
-///
-class RespError extends RespType<String> {
-  const RespError(String payload) : super._('-', payload);
-
-  @override
-  RespError toError() => this;
-
-  @override
-  bool get isError => true;
-
-  @override
-  String get typeName => 'error';
+/// TODO make this a proper error type to return in the future..
+/// since this is a runtime error, etc.. etc.. have
+class RespError {
+  final String error;
+  const RespError(this.error);
 }
 
-Future<RespType> deserializeRespType(StreamReader streamReader) async {
+Future<Object?> deserializeRespType(StreamReader streamReader) async {
   final typePrefix = await streamReader.takeOne();
   switch (typePrefix) {
-    case 0x2b: // simple string
-      final payload = utf8.decode(await streamReader.takeWhile((data) => data != 0x0d));
+    case _plus: // simple string
+      final payload =
+          utf8.decode(await streamReader.takeWhile((data) => data != _charCR));
       await streamReader.takeCount(2);
-      return RespSimpleString(payload);
+      return payload;
     case 0x2d: // error
-      final payload = utf8.decode(await streamReader.takeWhile((data) => data != 0x0d));
+      final payload =
+          utf8.decode(await streamReader.takeWhile((data) => data != _charCR));
       await streamReader.takeCount(2);
+      print(payload);
       return RespError(payload);
     case 0x3a: // integer
-      final payload = int.parse(utf8.decode(await streamReader.takeWhile((data) => data != 0x0d)));
+      final payload = int.parse(
+          utf8.decode(await streamReader.takeWhile((data) => data != _charCR)));
       await streamReader.takeCount(2);
-      return RespInteger(payload);
+      return payload;
     case 0x24: // bulk string
-      final length = int.parse(utf8.decode(await streamReader.takeWhile((data) => data != 0x0d)));
+      final length = int.parse(
+          utf8.decode(await streamReader.takeWhile((data) => data != _charCR)));
       await streamReader.takeCount(2);
       if (length == -1) {
-        return RespBulkString(null);
+        return null; //null bulk string
       }
       final payload = utf8.decode(await streamReader.takeCount(length));
       await streamReader.takeCount(2);
-      return RespBulkString(payload);
-    case 0x2a: // array
-      final count = int.parse(utf8.decode(await streamReader.takeWhile((data) => data != 0x0d)));
+      return payload;
+    case _asterisk: // array
+      final count = int.parse(
+          utf8.decode(await streamReader.takeWhile((data) => data != 0x0d)));
       await streamReader.takeCount(2);
       if (count == -1) {
-        return RespArray(null);
+        return null; // null array https://redis.io/docs/reference/protocol-spec/#nulls
       }
-      final elements = <RespType>[];
+      final elements = <dynamic>[];
       for (var i = 0; i < count; i++) {
-        elements.add(await deserializeRespType(streamReader));
+        elements.add(deserializeRespType(streamReader));
       }
-      return RespArray(elements);
+      return elements;
     default:
       throw StateError('unexpected character: $typePrefix');
   }
+}
+
+final _respNullArray = utf8.encode(
+    '\*-1$_CRLF'); // https://redis.io/docs/reference/protocol-spec/#nulls
+
+const int _plus = 0x2b; // +
+const int _asterisk = 0x2a; // *
+const int _charCR = 0x0d; // \r
+final _dollar = utf8.encode('\$');
+List<int> _CRLF = utf8.encode('\r\n');
+List<int> _colon = utf8.encode(':');
+final _nullBulkString = utf8.encode('\$-1');
+
+List<int> serializeObject(Object? object) {
+  if (object is String) {
+    //serialize a string
+    final encodedObject = utf8.encode(object);
+    return [
+      ..._dollar,
+      ...utf8.encode(encodedObject.length.toString()),
+      ..._CRLF,
+      ...encodedObject,
+      ..._CRLF
+    ];
+  } else if (object is int) {
+    return [
+      ..._colon,
+      ...utf8.encode(object.toString()),
+      ..._CRLF,
+    ];
+  } else if (object is RespBulkString) {
+    if (object.bytes == null) {
+      // TODO see if this is actually a null impl
+      return _respNullArray;
+    }
+    return [
+      ..._dollar,
+      ...utf8.encode(object.bytes!.length.toString()),
+      ..._CRLF,
+      ...object.bytes!,
+      ..._CRLF
+    ];
+  } else if (object is Iterable) {
+    return [
+      _asterisk,
+      ...utf8.encode(object.length.toString()),
+      ..._CRLF,
+      ...object.expand((item) => serializeObject(item)),
+      ..._CRLF,
+    ];
+  } else if (object == null) {
+    return _nullBulkString;
+  }
+  throw 'cannot serialize type ${object.runtimeType}';
 }

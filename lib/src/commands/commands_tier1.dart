@@ -49,25 +49,25 @@ class ClientType {
 }
 
 ///
-/// Commands of tier 1 always return a [RespType]. It is up
+/// Commands of tier 1 always return a [Object?]. It is up
 /// to the consumer to convert the result correctly into the
 /// concrete subtype.
 ///
 class RespCommandsTier1 {
-  final RespCommandsTier0 tier0;
 
-  RespCommandsTier1(RespClient client) : tier0 = RespCommandsTier0(client);
-  RespCommandsTier1.tier0(this.tier0);
+  final RespClient client;
 
-  Future<RespType> info([String? section]) async {
-    return tier0.execute([
+  RespCommandsTier1(this.client);
+
+  Future<Object?> info([String? section]) {
+    return client.sendObject([
       'INFO',
       if (section != null) section,
     ]);
   }
 
-  Future<RespType> clientList({ClientType? type, List<String> ids = const []}) async {
-    return tier0.execute([
+  Future<Object?> clientList({ClientType? type, List<String> ids = const []}) {
+    return client.sendObject([
       'CLIENT',
       'LIST',
       if (type != null) ...['TYPE', type._value],
@@ -75,44 +75,44 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> select(int index) async {
-    return tier0.execute([
+  Future<Object?> select(int index) {
+    return client.sendObject([
       'SELECT',
       index,
     ]);
   }
 
-  Future<RespType> dbsize() async {
-    return tier0.execute([
+  Future<Object?> dbsize() {
+    return client.sendObject([
       'DBSIZE',
     ]);
   }
 
-  Future<RespType> auth(String password) async {
-    return tier0.execute([
+  Future<Object?> auth(String password) {
+    return client.sendObject([
       'AUTH',
       password,
     ]);
   }
 
-  Future<RespType> flushDb({bool? doAsync}) async {
-    return tier0.execute([
+  Future<Object?> flushDb({bool? doAsync}) {
+    return client.sendObject([
       'FLUSHDB',
       if (doAsync != null) doAsync ? 'ASYNC' : 'SYNC',
     ]);
   }
 
-  Future<RespType> flushAll({bool? doAsync}) async {
-    return tier0.execute([
+  Future<Object?> flushAll({bool? doAsync}) {
+    return client.sendObject([
       'FLUSHALL',
       if (doAsync != null) doAsync ? 'ASYNC' : 'SYNC',
     ]);
   }
 
-  Future<RespType> set(String key, Object value, {ExpireMode? expire, SetMode? mode, bool get = false}) async {
+  Future<Object?> set(String key, Object value, {ExpireMode? expire, SetMode? mode, bool get = false}) {
     final expireTime = expire?.time;
     final expireTimestamp = expire?.timestamp;
-    return tier0.execute([
+    return client.sendObject([
       'SET',
       key,
       value,
@@ -125,44 +125,44 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> get(String key) async {
-    return tier0.execute([
+  Future<Object?> get(String key) {
+    return client.sendObject([
       'GET',
       key,
     ]);
   }
 
-  Future<RespType> del(List<String> keys) async {
-    return tier0.execute([
+  Future<Object?> del(List<String> keys) {
+    return client.sendObject([
       'DEL',
       ...keys,
     ]);
   }
 
-  Future<RespType> exists(List<String> keys) async {
-    return tier0.execute([
+  Future<Object?> exists(List<String> keys) {
+    return client.sendObject([
       'EXISTS',
       ...keys,
     ]);
   }
 
-  Future<RespType> ttl(String key) async {
-    return tier0.execute([
+  Future<Object?> ttl(String key) {
+    return client.sendObject([
       'TTL',
       key,
     ]);
   }
 
-  Future<RespType> pexpire(String key, Duration timeout) async {
-    return tier0.execute([
+  Future<Object?> pexpire(String key, Duration timeout) {
+    return client.sendObject([
       'PEXPIRE',
       key,
       timeout.inMilliseconds,
     ]);
   }
 
-  Future<RespType> hset(String key, String field, Object value) async {
-    return tier0.execute([
+  Future<Object?> hset(String key, String field, Object value) {
+    return client.sendObject([
       'HSET',
       key,
       field,
@@ -170,8 +170,8 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> hsetnx(String key, String field, Object value) async {
-    return tier0.execute([
+  Future<Object?> hsetnx(String key, String field, Object value) {
+    return client.sendObject([
       'HSETNX',
       key,
       field,
@@ -179,85 +179,85 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> hmset(String key, Map<String, String> keysAndValues) async {
-    return tier0.execute([
+  Future<Object?> hmset(String key, Map<String, String> keysAndValues) {
+    return client.sendObject([
       'HMSET',
       key,
       ...keysAndValues.entries.expand((e) => [e.key, e.value]),
     ]);
   }
 
-  Future<RespType> hget(String key, String field) async {
-    return tier0.execute([
+  Future<Object?> hget(String key, String field) {
+    return client.sendObject([
       'HGET',
       key,
       field,
     ]);
   }
 
-  Future<RespType> hgetall(String key) async {
-    return tier0.execute([
+  Future<Object?> hgetall(String key) {
+    return client.sendObject([
       'HGETALL',
       key,
     ]);
   }
 
-  Future<RespType> hmget(String key, List<String> fields) async {
-    return tier0.execute([
+  Future<Object?> hmget(String key, List<String> fields) {
+    return client.sendObject([
       'HMGET',
       key,
       ...fields,
     ]);
   }
 
-  Future<RespType> hdel(String key, List<String> fields) async {
-    return tier0.execute([
+  Future<Object?> hdel(String key, List<String> fields) {
+    return client.sendObject([
       'HDEL',
       key,
       ...fields,
     ]);
   }
 
-  Future<RespType> hexists(String key, String field) async {
-    return tier0.execute([
+  Future<Object?> hexists(String key, String field) {
+    return client.sendObject([
       'HEXISTS',
       key,
       field,
     ]);
   }
 
-  Future<RespType> hkeys(String key) async {
-    return tier0.execute([
+  Future<Object?> hkeys(String key) {
+    return client.sendObject([
       'HKEYS',
       key,
     ]);
   }
 
-  Future<RespType> hvals(String key) async {
-    return tier0.execute([
+  Future<Object?> hvals(String key) {
+    return client.sendObject([
       'HVALS',
       key,
     ]);
   }
 
-  Future<RespType> blpop(List<String> keys, int timeout) async {
-    return tier0.execute([
+  Future<Object?> blpop(List<String> keys, int timeout) {
+    return client.sendObject([
       'BLPOP',
       ...keys,
       timeout,
     ]);
   }
 
-  Future<RespType> brpop(List<String> keys, int timeout) async {
-    return tier0.execute([
+  Future<Object?> brpop(List<String> keys, int timeout) {
+    return client.sendObject([
       'BRPOP',
       ...keys,
       timeout,
     ]);
   }
 
-  Future<RespType> brpoplpush(String source, String destination, int timeout) async {
-    return tier0.execute([
+  Future<Object?> brpoplpush(String source, String destination, int timeout) {
+    return client.sendObject([
       'BRPOPLPUSH',
       source,
       destination,
@@ -265,16 +265,16 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> lindex(String key, int index) async {
-    return tier0.execute([
+  Future<Object?> lindex(String key, int index) {
+    return client.sendObject([
       'LINDEX',
       key,
       index,
     ]);
   }
 
-  Future<RespType> linsert(String key, InsertMode insertMode, Object pivot, Object value) async {
-    return tier0.execute([
+  Future<Object?> linsert(String key, InsertMode insertMode, Object pivot, Object value) {
+    return client.sendObject([
       'LINSERT',
       key,
       insertMode._value,
@@ -283,38 +283,38 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> llen(String key) async {
-    return tier0.execute([
+  Future<Object?> llen(String key) {
+    return client.sendObject([
       'LLEN',
       key,
     ]);
   }
 
-  Future<RespType> lpop(String key) async {
-    return tier0.execute([
+  Future<Object?> lpop(String key) {
+    return client.sendObject([
       'LPOP',
       key,
     ]);
   }
 
-  Future<RespType> lpush(String key, List<Object> values) async {
-    return tier0.execute([
+  Future<Object?> lpush(String key, List<Object> values) {
+    return client.sendObject([
       'LPUSH',
       key,
       ...values,
     ]);
   }
 
-  Future<RespType> lpushx(String key, List<Object> values) async {
-    return tier0.execute([
+  Future<Object?> lpushx(String key, List<Object> values) {
+    return client.sendObject([
       'LPUSHX',
       key,
       ...values,
     ]);
   }
 
-  Future<RespType> lrange(String key, int start, int stop) async {
-    return tier0.execute([
+  Future<Object?> lrange(String key, int start, int stop) {
+    return client.sendObject([
       'LRANGE',
       key,
       start,
@@ -322,8 +322,8 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> lrem(String key, int count, Object value) async {
-    return tier0.execute([
+  Future<Object?> lrem(String key, int count, Object value) {
+    return client.sendObject([
       'LREM',
       key,
       count,
@@ -331,8 +331,8 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> lset(String key, int index, Object value) async {
-    return tier0.execute([
+  Future<Object?> lset(String key, int index, Object value) {
+    return client.sendObject([
       'LSET',
       key,
       index,
@@ -340,8 +340,8 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> ltrim(String key, int start, int stop) async {
-    return tier0.execute([
+  Future<Object?> ltrim(String key, int start, int stop) {
+    return client.sendObject([
       'LTRIM',
       key,
       start,
@@ -349,69 +349,69 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> rpop(String key) async {
-    return tier0.execute([
+  Future<Object?> rpop(String key) {
+    return client.sendObject([
       'RPOP',
       key,
     ]);
   }
 
-  Future<RespType> rpoplpush(String source, String destination) async {
-    return tier0.execute([
+  Future<Object?> rpoplpush(String source, String destination) {
+    return client.sendObject([
       'RPOPLPUSH',
       source,
       destination,
     ]);
   }
 
-  Future<RespType> rpush(String key, List<Object> values) async {
-    return tier0.execute([
+  Future<Object?> rpush(String key, List<Object> values) {
+    return client.sendObject([
       'RPUSH',
       key,
       ...values,
     ]);
   }
 
-  Future<RespType> rpushx(String key, List<Object> values) async {
-    return tier0.execute([
+  Future<Object?> rpushx(String key, List<Object> values) {
+    return client.sendObject([
       'RPUSHX',
       key,
       ...values,
     ]);
   }
 
-  Future<RespType> incr(String key) async {
-    return tier0.execute([
+  Future<Object?> incr(String key) {
+    return client.sendObject([
       'INCR',
       key,
     ]);
   }
 
-  Future<RespType> incrby(String key, int increment) async {
-    return tier0.execute([
+  Future<Object?> incrby(String key, int increment) {
+    return client.sendObject([
       'INCRBY',
       key,
       '$increment',
     ]);
   }
 
-  Future<RespType> decr(String key) async {
-    return tier0.execute([
+  Future<Object?> decr(String key) {
+    return client.sendObject([
       'DECR',
       key,
     ]);
   }
 
-  Future<RespType> decrby(String key, int decrement) async {
-    return tier0.execute([
+  Future<Object?> decrby(String key, int decrement) {
+    return client.sendObject([
       'DECRBY',
       key,
       '$decrement',
     ]);
   }
 
-  Future<RespType> scan(int cursor, {String? pattern, int? count}) async {
-    return tier0.execute([
+  Future<Object?> scan(int cursor, {String? pattern, int? count}) {
+    return client.sendObject([
       'SCAN',
       '$cursor',
       if (pattern != null) ...['MATCH', pattern],
@@ -419,55 +419,55 @@ class RespCommandsTier1 {
     ]);
   }
 
-  Future<RespType> publish(String channel, Object message) async {
-    return tier0.execute([
+  Future<Object?> publish(String channel, Object message) {
+    return client.sendObject([
       'PUBLISH',
       channel,
       message,
     ]);
   }
 
-  Future<RespType> subscribe(List<String> channels) async {
-    return tier0.execute([
+  Future<Object?> subscribe(List<String> channels) {
+    return client.sendObject([
       'SUBSCRIBE',
       ...channels,
     ]);
   }
 
-  Future<RespType> unsubscribe(Iterable<String> channels) async {
-    return tier0.execute([
+  Future<Object?> unsubscribe(Iterable<String> channels) {
+    return client.sendObject([
       'UNSUBSCRIBE',
       ...channels,
     ]);
   }
 
-  Future<RespType> multi() async {
-    return tier0.execute([
+  Future<Object?> multi() {
+    return client.sendObject([
       'MULTI',
     ]);
   }
 
-  Future<RespType> exec() async {
-    return tier0.execute([
+  Future<Object?> exec() {
+    return client.sendObject([
       'EXEC',
     ]);
   }
 
-  Future<RespType> discard() async {
-    return tier0.execute([
+  Future<Object?> discard() {
+    return client.sendObject([
       'DISCARD',
     ]);
   }
 
-  Future<RespType> watch(List<String> keys) async {
-    return tier0.execute([
+  Future<Object?> watch(List<String> keys) {
+    return client.sendObject([
       'WATCH',
       ...keys,
     ]);
   }
 
-  Future<RespType> unwatch() async {
-    return tier0.execute([
+  Future<Object?> unwatch() {
+    return client.sendObject([
       'UNWATCH',
     ]);
   }
