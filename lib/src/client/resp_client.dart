@@ -27,6 +27,11 @@ class RespClient {
     return completer.future;
   }
 
+  /// type wrapper for sendObject that ensures that only strings
+  /// are sent to the redis connection (redis expects a list of bulk strings)
+  Future<Object?> sendCommand(Iterable<String> data) => sendObject(data);
+  
+
   Stream<Object?> subscribe() {
     final controller = StreamController<Object?>();
     deserializeRespType(_streamReader).then((response) {

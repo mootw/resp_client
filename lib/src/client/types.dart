@@ -10,8 +10,8 @@ class RespBulkString {
 /// TODO make this a proper error type to return in the future..
 /// since this is a runtime error, etc.. etc.. have
 class RespError {
-  final String error;
-  const RespError(this.error);
+  final String message;
+  const RespError(this.message);
 }
 
 Future<Object?> deserializeRespType(StreamReader streamReader) async {
@@ -45,14 +45,14 @@ Future<Object?> deserializeRespType(StreamReader streamReader) async {
       return payload;
     case _asterisk: // array
       final count = int.parse(
-          utf8.decode(await streamReader.takeWhile((data) => data != 0x0d)));
+          utf8.decode(await streamReader.takeWhile((data) => data != _charCR)));
       await streamReader.takeCount(2);
       if (count == -1) {
         return null; // null array https://redis.io/docs/reference/protocol-spec/#nulls
       }
       final elements = <dynamic>[];
       for (var i = 0; i < count; i++) {
-        elements.add(deserializeRespType(streamReader));
+        elements.add(await deserializeRespType(streamReader));
       }
       return elements;
     default:
