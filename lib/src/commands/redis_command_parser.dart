@@ -1,10 +1,10 @@
 part of resp_commands;
 
-///Opinionated typing for redis commands
+///Opinionated parsing/typing for redis command responses
 class RedisCommandParser {
 
   int asInt(Object? response) => response as int;
-  
+
   String? asMaybeString(Object? response) => response as String?;
 
   Map<String, String> asMap (Object? response) {

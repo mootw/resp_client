@@ -1,75 +1,73 @@
 part of resp_commands;
 
-/// useb by RedisCommands to
 /// create a transaction that safely wraps
 /// commands to ensure that 2 transactions
 /// do not conflict, and that all the commands in the
 /// transaction are as expected (no other commands get mixed in)
-/// by NOT awaiting. think of it as await safety...
+/// by NOT awaiting. think of it as await safety and includes
+/// autoamtic parsing
 class Transaction {
   final _parser = RedisCommandParser();
+  final _cmds = <({Future<Object?> Function() cmd, Function(Object?) parse})>[];
+  final RedisCommandMap _redisMap;
 
-  final RedisCommandMap _commands;
-
-  Transaction(this._commands);
-
-  final items = <({Function caller, Function(Object?) parse})>[];
-
-  final parsers = <Function>[];
+  Transaction(this._redisMap);
 
   /// queues all of the commands and runs them at once
   /// this prevents accidentally nesting multi calls
+  /// or an awaited value in the builder to cause nested
+  /// multi chaos
   Future<List<Object?>> exec() async {
-    // TODO this "way of doing things" explicitly makes errors..
-    // difficult.. to handle...
-    unawaited(_commands.multi());
-    for (final command in items) {
-      command.caller();
+    // this "way of doing things" by passing functions in functions
+    // makes errors.. difficult.. to handle...
+    // but it does provide good safety against accidentally nesting
+    // multi calls by accidentially awaiting something
+    unawaited(_redisMap.multi());
+    for (final command in _cmds) {
+      unawaited(command.cmd());
     }
-    final result = await _commands.exec();
+    final result = await _redisMap.exec();
     if (result is RespError) {
       throw result;
     }
     return (result as List)
         .indexed
-        .map((e) => items[e.$1].parse(e.$2))
+        .map((e) => _cmds[e.$1].parse(e.$2))
         .toList();
   }
 
-  //This is potentially a more "builder" method of doing it
-  //would need to call multi before starting the transaction though
-  //which is fine! Potentially this can allow for override behavior
-  //too like a generic "call redis command thing.."
-  //another upside is there is stronger typing here, we arent caling
-  //2 functions as parameters, just 1!
-  //TODO LOOK AT THIS PLEASE!!!!
-  void incrALTERNATE(String key) {
-    parsers.add(_parser.asInt);
-    _commands.incr(key);
-  }
-
-  void incr(String key) => items.add((
-        caller: () => _commands.incr(key),
+  void incr(String key) => _cmds.add((
+        cmd: () => _redisMap.incr(key),
         parse: _parser.asInt,
       ));
 
-  void ttl(String key) => items.add((
-        caller: () => _commands.ttl(key),
+  void ttl(String key) => _cmds.add((
+        cmd: () => _redisMap.ttl(key),
         parse: _parser.asInt,
       ));
 
-  void get(String key) => items.add((
-        caller: () => _commands.get(key),
+  void get(String key) => _cmds.add((
+        cmd: () => _redisMap.get(key),
         parse: _parser.asMaybeString,
       ));
 
-  void set(String key, String value) => items.add((
-        caller: () => _commands.set(key, value),
+  void set(String key, String value) => _cmds.add((
+        cmd: () => _redisMap.set(key, value),
         parse: _parser.asMaybeString,
       ));
 
-  void hgetall(String key) => items.add((
-        caller: () => _commands.hgetall(key),
+  void hgetall(String key) => _cmds.add((
+        cmd: () => _redisMap.hgetall(key),
         parse: _parser.asMap,
+      ));
+
+  void exists(List<String> keys) => _cmds.add((
+        cmd: () => _redisMap.exists(keys),
+        parse: _parser.asInt,
+      ));
+
+  void pexpire(String key, Duration duration) => _cmds.add((
+        cmd: () => _redisMap.pexpire(key, duration),
+        parse: _parser.asInt,
       ));
 }

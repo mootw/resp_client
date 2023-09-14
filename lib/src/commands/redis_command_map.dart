@@ -1,18 +1,17 @@
 part of resp_commands;
 
-
-/// Implementation of redis commands with a tasteful 
+/// Implementation of redis commands with a tasteful
 /// amount of added typing added to the input
 /// the output is still untyped intentionally and will
-/// vary depending on conditions or even if you send
+/// vary depending on conditions, or even error if you send
 /// an exec without a multi call for instance. there
-/// is no usage safety here.
+/// is almost no safety here.
 class RedisCommandMap {
   RespClient client;
 
   RedisCommandMap(this.client);
 
-  Future<Object?> incr(String key) => client.sendCommand(['TTL', key]);
+  Future<Object?> incr(String key) => client.sendCommand(['INCR', key]);
 
   Future<Object?> ttl(String key) => client.sendCommand(['TTL', key]);
 

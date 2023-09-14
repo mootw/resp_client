@@ -1,35 +1,28 @@
 part of resp_commands;
 
-/// Implementation of redis commands WITH full 
-/// 'language support'. basically errors will throw
-/// and types will return as expected
+/// Implementation of redis commands WITH opinionated
+/// parsing and typing. this is the recommended way to
+/// interact given the usage and typing safety provided.
 class RedisCommands {
-  final RedisCommandMap base;
+  final RedisCommandMap cmd;
 
-  final RedisCommandParser _parser = RedisCommandParser();
+  final RedisCommandParser _parse = RedisCommandParser();
 
-  RedisCommands(this.base);
+  RedisCommands(this.cmd);
 
-  Future<int> ttl(String key) async => _parser.asInt(await base.ttl(key));
+  Future<int> ttl(String key) async => await cmd.ttl(key) as int;
 
   Future<String?> set(String key, String value) async =>
-      await base.set(key, value) as String?;
+      await cmd.set(key, value) as String?;
 
-  Future<Object?> get(String key) async => await base.get(key);
+  Future<Object?> get(String key) async => await cmd.get(key);
 
-  Future<int> incr(String key) async => await base.incr(key) as int;
+  Future<int> incr(String key) async => await cmd.incr(key) as int;
 
   /// https://redis.io/commands/hgetall/
   /// returns an empty map when the redis reply is empty
-  Future<Map<String, String>> hgetall(String key) async {
-    final list = await base.hgetall(key) as List;
-    final entries = <MapEntry<String, String>>[];
-    for (var i = 0; i < list.length; i += 2) {
-      entries
-          .add(MapEntry(await list[i] as String, await list[i + 1] as String));
-    }
-    return Map<String, String>.fromEntries(entries);
-  }
+  Future<Map<String, String>> hgetall(String key) async =>
+      _parse.asMap(await cmd.hgetall(key));
 
   /// https://redis.io/commands/geoadd/
   Future<int> geoadd(
@@ -38,20 +31,18 @@ class RedisCommands {
     String? elementOption,
     bool? CH,
   ]) async =>
-      await base.geoadd(key, items, elementOption, CH) as int;
+      await cmd.geoadd(key, items, elementOption, CH) as int;
 
   /// https://redis.io/commands/exists/
-  Future<int> exists(Iterable<String> keys) async {
-    return await base.exists(keys) as int;
-  }
+  Future<int> exists(Iterable<String> keys) async =>
+      await cmd.exists(keys) as int;
 
   /// https://redis.io/commands/hset/
   Future<int> hset(
     String key,
     Iterable<MapEntry<String, String>> entries,
-  ) async {
-    return await base.hset(key, entries) as int;
-  }
+  ) async =>
+      await cmd.hset(key, entries) as int;
 
   /// https://redis.io/commands/expire/
   Future<int> pexpire(
@@ -59,22 +50,14 @@ class RedisCommands {
     Duration duration, [
     String? option,
   ]) async =>
-      await base.pexpire(key, duration, option) as int;
+      await cmd.pexpire(key, duration, option) as int;
 
-  Future<Object?> scan(int cursor, {String? pattern, int? count}) {
-    return base.scan(cursor, pattern: pattern, count: count);
-  }
+  Future<Object?> scan(int cursor, {String? pattern, int? count}) =>
+      cmd.scan(cursor, pattern: pattern, count: count);
 
-  //Safety wrapper for transactions...
-  Transaction multi() {
-    return Transaction(base);
-  }
+  Transaction multi() => Transaction(cmd);
 
-  Future<Object?> watch(List<String> keys) {
-    return base.watch(keys);
-  }
+  Future<Object?> watch(List<String> keys) => cmd.watch(keys);
 
-  Future<Object?> unwatch() {
-    return base.unwatch();
-  }
+  Future<Object?> unwatch() => cmd.unwatch();
 }
