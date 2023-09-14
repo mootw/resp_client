@@ -7,7 +7,7 @@ part of resp_commands;
 /// by NOT awaiting. think of it as await safety and includes
 /// autoamtic parsing
 class Transaction {
-  final _parser = RedisCommandParser();
+  final _parse = RedisCommandParser();
   final _cmds = <({Future<Object?> Function() cmd, Function(Object?) parse})>[];
   final RedisCommandMap _redisMap;
 
@@ -38,36 +38,45 @@ class Transaction {
 
   void incr(String key) => _cmds.add((
         cmd: () => _redisMap.incr(key),
-        parse: _parser.asInt,
+        parse: _parse.asInt,
       ));
 
   void ttl(String key) => _cmds.add((
         cmd: () => _redisMap.ttl(key),
-        parse: _parser.asInt,
+        parse: _parse.asInt,
       ));
 
   void get(String key) => _cmds.add((
         cmd: () => _redisMap.get(key),
-        parse: _parser.asMaybeString,
+        parse: _parse.asMaybeString,
       ));
 
   void set(String key, String value) => _cmds.add((
         cmd: () => _redisMap.set(key, value),
-        parse: _parser.asMaybeString,
+        parse: _parse.asMaybeString,
       ));
 
   void hgetall(String key) => _cmds.add((
         cmd: () => _redisMap.hgetall(key),
-        parse: _parser.asMap,
+        parse: _parse.asMap,
       ));
 
   void exists(List<String> keys) => _cmds.add((
         cmd: () => _redisMap.exists(keys),
-        parse: _parser.asInt,
+        parse: _parse.asInt,
       ));
 
   void pexpire(String key, Duration duration) => _cmds.add((
         cmd: () => _redisMap.pexpire(key, duration),
-        parse: _parser.asInt,
+        parse: _parse.asInt,
+      ));
+
+  void hset(
+    String key,
+    Iterable<MapEntry<String, String>> entries,
+  ) =>
+      _cmds.add((
+        cmd: () => _redisMap.hset(key, entries),
+        parse: _parse.asInt,
       ));
 }
