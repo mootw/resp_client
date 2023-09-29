@@ -15,8 +15,16 @@ class RedisCommandMap {
 
   Future<Object?> ttl(String key) => client.sendCommand(['TTL', key]);
 
-  Future<Object?> set(String key, String value) =>
-      client.sendCommand(['SET', key, value]);
+  Future<Object?> set(String key, String value,
+          {bool? get, Duration? px}) =>
+      client.sendCommand([
+        'SET',
+        key,
+        value,
+        if (get == true) 'GET',
+        if (px != null) 'PX',
+        if (px != null) px.inMilliseconds.toString()
+      ]);
 
   Future<Object?> get(String key) => client.sendCommand(['GET', key]);
 

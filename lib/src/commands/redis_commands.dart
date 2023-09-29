@@ -12,10 +12,10 @@ class RedisCommands {
 
   Future<int> ttl(String key) async => await cmd.ttl(key) as int;
 
-  Future<String?> set(String key, String value) async =>
-      await cmd.set(key, value) as String?;
+  Future<String?> set(String key, String value, {bool? get, Duration? px}) async =>
+      await cmd.set(key, value, get: get, px: px) as String?;
 
-  Future<Object?> get(String key) async => await cmd.get(key);
+  Future<String?> get(String key) async => await cmd.get(key) as String?;
 
   Future<int> incr(String key) async => await cmd.incr(key) as int;
 
