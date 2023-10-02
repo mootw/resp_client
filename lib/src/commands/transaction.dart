@@ -51,8 +51,14 @@ class Transaction {
         parse: _parse.asMaybeString,
       ));
 
-  void set(String key, String value) => _cmds.add((
-        cmd: () => _redisMap.set(key, value),
+  void set(
+    String key,
+    String value, {
+    bool? get,
+    Duration? px,
+  }) =>
+      _cmds.add((
+        cmd: () => _redisMap.set(key, value, get: get, px: px),
         parse: _parse.asMaybeString,
       ));
 
