@@ -1,3 +1,6 @@
+FORKED FROM https://github.com/Blimster/resp_client
+
+
 # resp_client
 A RESP (REdis Serialization Protocol) client for Dart. This package contains 3 libraries. `resp_server` implements the connectionn to the server, `resp_client` implements the Redis serialization protocol. `resp_commands` provides implementations of Redis commands in differents levels of convenience from low-level to easy-to-use.
 

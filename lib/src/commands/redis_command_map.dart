@@ -15,8 +15,7 @@ class RedisCommandMap {
 
   Future<Object?> ttl(String key) => client.sendCommand(['TTL', key]);
 
-  Future<Object?> set(String key, String value,
-          {bool? get, Duration? px}) =>
+  Future<Object?> set(String key, String value, {bool? get, Duration? px}) =>
       client.sendCommand([
         'SET',
         key,
@@ -64,6 +63,12 @@ class RedisCommandMap {
   Future<Object?> del(Iterable<String> keys) {
     assert(keys.isNotEmpty);
     return client.sendCommand(['DEL', ...keys]);
+  }
+
+  /// https://redis.io/commands/mget/
+  Future<Object?> mget(Iterable<String> keys) {
+    assert(keys.isNotEmpty);
+    return client.sendCommand(['MGET', ...keys]);
   }
 
   /// https://redis.io/commands/hset/
