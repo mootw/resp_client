@@ -60,6 +60,12 @@ class RedisCommandMap {
     return client.sendCommand(['EXISTS', ...keys]);
   }
 
+  /// https://redis.io/commands/del/
+  Future<Object?> del(Iterable<String> keys) {
+    assert(keys.isNotEmpty);
+    return client.sendCommand(['DEL', ...keys]);
+  }
+
   /// https://redis.io/commands/hset/
   Future<Object?> hset(
     String key,

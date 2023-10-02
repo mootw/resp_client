@@ -12,7 +12,8 @@ class RedisCommands {
 
   Future<int> ttl(String key) async => await cmd.ttl(key) as int;
 
-  Future<String?> set(String key, String value, {bool? get, Duration? px}) async =>
+  Future<String?> set(String key, String value,
+          {bool? get, Duration? px}) async =>
       await cmd.set(key, value, get: get, px: px) as String?;
 
   Future<String?> get(String key) async => await cmd.get(key) as String?;
@@ -36,6 +37,9 @@ class RedisCommands {
   /// https://redis.io/commands/exists/
   Future<int> exists(Iterable<String> keys) async =>
       await cmd.exists(keys) as int;
+
+  /// https://redis.io/commands/del/
+  Future<int> del(Iterable<String> keys) async => await cmd.del(keys) as int;
 
   /// https://redis.io/commands/hset/
   Future<int> hset(
