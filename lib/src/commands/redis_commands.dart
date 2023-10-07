@@ -34,6 +34,14 @@ class RedisCommands {
   ]) async =>
       await cmd.geoadd(key, items, elementOption, CH) as int;
 
+  /// https://redis.io/commands/geoadd/
+  Future<List?> geosearchbylonlatbbox(
+    String key,
+    double lon, double lat, double widthM, double heightM,) async =>
+      await cmd.geosearchlonlatbbox(key, lon, lat, widthM, heightM) as List;
+
+  
+
   /// https://redis.io/commands/exists/
   Future<int> exists(Iterable<String> keys) async =>
       await cmd.exists(keys) as int;

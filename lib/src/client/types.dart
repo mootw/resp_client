@@ -67,8 +67,8 @@ const int _plus = 0x2b; // +
 const int _asterisk = 0x2a; // *
 const int _charCR = 0x0d; // \r
 final _dollar = utf8.encode('\$');
-List<int> _CRLF = utf8.encode('\r\n');
-List<int> _colon = utf8.encode(':');
+final List<int> _CRLF = utf8.encode('\r\n');
+final List<int> _colon = utf8.encode(':');
 final _nullBulkString = utf8.encode('\$-1');
 
 List<int> serializeObject(Object? object) {

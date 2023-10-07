@@ -4,13 +4,17 @@ part of resp_client;
 /// The client for a RESP server.
 ///
 class RespClient {
-  final RespServerConnection _connection;
+  final Socket _connection;
   final StreamReader _streamReader;
   final Queue<Completer> _pendingResponses = Queue();
   bool _isProccessingResponse = false;
 
   RespClient(this._connection)
-      : _streamReader = StreamReader(_connection.inputStream);
+      : _streamReader = StreamReader(_connection);
+
+  
+  Queue sendQueue = Queue();
+
 
   ///
   /// Writes a Object to the server using the
@@ -22,7 +26,7 @@ class RespClient {
   Future<Object?> sendObject(Object data) {
     final completer = Completer<Object?>();
     _pendingResponses.add(completer);
-    _connection.outputSink.add(serializeObject(data));
+    _connection.add(serializeObject(data));
     _processResponse(false);
     return completer.future;
   }

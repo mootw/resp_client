@@ -53,6 +53,22 @@ class RedisCommandMap {
         ],
       ]);
 
+  /// TODO generic implementation
+  /// https://redis.io/commands/geoadd/
+  Future<Object?> geosearchlonlatbbox(
+          String key, double lon, double lat, double widthM, double heightM) =>
+      client.sendCommand([
+        'GEOSEARCH',
+        key,
+        'FROMLONLAT',
+        lon.toString(),
+        lat.toString(),
+        'BYBOX',
+        widthM.toString(),
+        heightM.toString(),
+        'M',
+      ]);
+
   /// https://redis.io/commands/exists/
   Future<Object?> exists(Iterable<String> keys) {
     assert(keys.isNotEmpty);
