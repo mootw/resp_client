@@ -66,7 +66,7 @@ class RedisCommandMap {
         'BYBOX',
         widthM.toString(),
         heightM.toString(),
-        'M',
+        'm',
       ]);
 
   /// https://redis.io/commands/exists/
