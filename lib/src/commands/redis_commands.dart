@@ -40,8 +40,6 @@ class RedisCommands {
     double lon, double lat, double widthM, double heightM,) async =>
       await cmd.geosearchlonlatbbox(key, lon, lat, widthM, heightM) as List;
 
-  
-
   /// https://redis.io/commands/exists/
   Future<int> exists(Iterable<String> keys) async =>
       await cmd.exists(keys) as int;
@@ -51,7 +49,6 @@ class RedisCommands {
 
   /// https://redis.io/commands/mget/
   Future<List<Object?>> mget(Iterable<String> keys) async => await cmd.mget(keys) as List;
-
 
   /// https://redis.io/commands/hset/
   Future<int> hset(
@@ -68,8 +65,9 @@ class RedisCommands {
   ]) async =>
       await cmd.pexpire(key, duration, option) as int;
 
-  Future<Object?> scan(int cursor, {String? pattern, int? count}) =>
-      cmd.scan(cursor, pattern: pattern, count: count);
+  /// https://redis.io/commands/scan/
+  Future<({int cursor, List<dynamic> results})> scan(int cursor, {String? pattern, int? count}) async =>
+      _parse.asScanResult(await cmd.scan(cursor, pattern: pattern, count: count));
 
   Transaction multi() => Transaction(cmd);
 

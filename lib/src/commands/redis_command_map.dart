@@ -53,7 +53,7 @@ class RedisCommandMap {
         ],
       ]);
 
-  /// TODO generic implementation
+  /// TODO create generic implementation
   /// https://redis.io/commands/geoadd/
   Future<Object?> geosearchlonlatbbox(
           String key, double lon, double lat, double widthM, double heightM) =>

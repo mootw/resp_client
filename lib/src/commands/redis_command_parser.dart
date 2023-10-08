@@ -17,4 +17,12 @@ class RedisCommandParser {
     return Map<String, String>.fromEntries(entries);
   }
 
+  ({int cursor, List<dynamic> results}) asScanResult (Object? response) {
+    final list = response as List;
+    return (
+      cursor: int.parse(list[0]),
+      results: list[1],
+    );
+  }
+
 }
