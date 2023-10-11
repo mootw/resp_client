@@ -53,7 +53,7 @@ class RedisCommands {
   /// https://redis.io/commands/hset/
   Future<int> hset(
     String key,
-    Iterable<MapEntry<String, String>> entries,
+    Map<String, String> entries,
   ) async =>
       await cmd.hset(key, entries) as int;
 

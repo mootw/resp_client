@@ -79,7 +79,7 @@ class Transaction {
 
   void hset(
     String key,
-    Iterable<MapEntry<String, String>> entries,
+    Map<String, String> entries,
   ) =>
       _cmds.add((
         cmd: () => _redisMap.hset(key, entries),

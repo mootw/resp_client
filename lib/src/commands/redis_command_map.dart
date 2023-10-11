@@ -90,13 +90,13 @@ class RedisCommandMap {
   /// https://redis.io/commands/hset/
   Future<Object?> hset(
     String key,
-    Iterable<MapEntry<String, String>> entries,
+    Map<String, String> entries,
   ) {
     assert(entries.isNotEmpty);
     return client.sendCommand([
       'HSET',
       key,
-      for (final item in entries) ...[item.key, item.value],
+      for (final item in entries.entries) ...[item.key, item.value],
     ]);
   }
 
