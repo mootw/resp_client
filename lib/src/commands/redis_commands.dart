@@ -57,6 +57,13 @@ class RedisCommands {
   ) async =>
       await cmd.hset(key, entries) as int;
 
+  /// https://redis.io/commands/hdel/
+  Future<int> hdel(
+    String key,
+    List<String> fields,
+  ) async =>
+      await cmd.hdel(key, fields) as int;
+
   /// https://redis.io/commands/expire/
   Future<int> pexpire(
     String key,

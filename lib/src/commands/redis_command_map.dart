@@ -100,6 +100,19 @@ class RedisCommandMap {
     ]);
   }
 
+  /// https://redis.io/commands/hset/
+  Future<Object?> hdel(
+    String key,
+    List<String> fields,
+  ) {
+    assert(fields.isNotEmpty);
+    return client.sendCommand([
+      'HDEL',
+      key,
+      ...fields,
+    ]);
+  }
+
   /// https://redis.io/commands/expire/
   Future<Object?> pexpire(
     String key,
