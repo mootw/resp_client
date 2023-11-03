@@ -25,10 +25,9 @@ class RedisCommands {
   Future<Map<String, String>> hgetall(String key) async =>
       _parse.asMap(await cmd.hgetall(key));
   
-    /// https://redis.io/commands/hmget/
+  /// https://redis.io/commands/hmget/
   /// returns an empty map when the redis reply is empty
-  Future<Map<String, String>> hmget(String key, List<String> fields) async =>
-      _parse.asMap(await cmd.hmget(key, fields));
+  Future<List> hmget(String key, List<String> fields) async => await cmd.hmget(key, fields) as List;
 
   /// https://redis.io/commands/geoadd/
   Future<int> geoadd(

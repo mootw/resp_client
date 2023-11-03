@@ -5,6 +5,8 @@ class RedisCommandParser {
 
   int asInt(Object? response) => response as int;
 
+  List asList(Object? response) => response as List;
+
   String? asMaybeString(Object? response) => response as String?;
 
   Map<String, String> asMap (Object? response) {
