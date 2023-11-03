@@ -34,6 +34,14 @@ class RedisCommandMap {
         key,
       ]);
 
+  /// https://redis.io/commands/hgetall/
+  /// returns an empty map when the redis reply is empty
+  Future<Object?> hmget(String key, List<String> fields) => client.sendCommand([
+        'HMGET',
+        key,
+        ...fields,
+      ]);
+
   /// https://redis.io/commands/geoadd/
   Future<Object?> geoadd(
     String key,

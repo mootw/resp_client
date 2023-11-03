@@ -33,8 +33,7 @@ class StreamReader {
   }
 
   Future<int> takeOne() async {
-    final data = await takeCount(1);
-    return data[0];
+    return (await takeCount(1))[0];
   }
 
   Future<List<int>> takeWhile(bool Function(int) predicate) {
