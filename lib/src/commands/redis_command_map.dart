@@ -36,7 +36,7 @@ class RedisCommandMap {
 
   /// https://redis.io/commands/hgetall/
   /// returns an empty map when the redis reply is empty
-  Future<Object?> hmget(String key, List<String> fields) => client.sendCommand([
+  Future<Object?> hmget(String key, Iterable<String> fields) => client.sendCommand([
         'HMGET',
         key,
         ...fields,
@@ -45,7 +45,7 @@ class RedisCommandMap {
   /// https://redis.io/commands/geoadd/
   Future<Object?> geoadd(
     String key,
-    List<({double longitude, double latitude, String member})> items, [
+    Iterable<({double longitude, double latitude, String member})> items, [
     String? elementOption,
     bool? CH,
   ]) =>
@@ -89,6 +89,11 @@ class RedisCommandMap {
     return client.sendCommand(['DEL', ...keys]);
   }
 
+  /// https://redis.io/commands/smembers/
+  Future<Object?> smembers(String key) {
+    return client.sendCommand(['SMEMBERS', key]);
+  }
+
   /// https://redis.io/commands/mget/
   Future<Object?> mget(Iterable<String> keys) {
     assert(keys.isNotEmpty);
@@ -108,16 +113,42 @@ class RedisCommandMap {
     ]);
   }
 
-  /// https://redis.io/commands/hset/
+  /// https://redis.io/commands/hdel/
   Future<Object?> hdel(
     String key,
-    List<String> fields,
+    Iterable<String> fields,
   ) {
     assert(fields.isNotEmpty);
     return client.sendCommand([
       'HDEL',
       key,
       ...fields,
+    ]);
+  }
+
+  /// https://redis.io/commands/srem/
+  Future<Object?> sadd(
+    String key,
+    Iterable<String> members,
+  ) {
+    assert(members.isNotEmpty);
+    return client.sendCommand([
+      'SADD',
+      key,
+      ...members,
+    ]);
+  }
+
+    /// https://redis.io/commands/srem/
+  Future<Object?> srem(
+    String key,
+    Iterable<String> members,
+  ) {
+    assert(members.isNotEmpty);
+    return client.sendCommand([
+      'SREM',
+      key,
+      ...members,
     ]);
   }
 
@@ -151,7 +182,7 @@ class RedisCommandMap {
         'EXEC',
       ]);
 
-  Future<Object?> watch(List<String> keys) => client.sendCommand([
+  Future<Object?> watch(Iterable<String> keys) => client.sendCommand([
         'WATCH',
         ...keys,
       ]);

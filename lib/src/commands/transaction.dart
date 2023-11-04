@@ -82,6 +82,21 @@ class Transaction {
         parse: _parse.asInt,
       ));
 
+  void hdel(String key, List<String> fields) => _cmds.add((
+        cmd: () => _redisMap.hdel(key, fields),
+        parse: _parse.asInt,
+      ));
+
+  void srem(String key, List<String> members) => _cmds.add((
+        cmd: () => _redisMap.srem(key, members),
+        parse: _parse.asInt,
+      ));
+
+  void sadd(String key, Iterable<String> members) => _cmds.add((
+        cmd: () => _redisMap.sadd(key, members),
+        parse: _parse.asMaybeString,
+      ));
+
   void hset(
     String key,
     Map<String, String> entries,

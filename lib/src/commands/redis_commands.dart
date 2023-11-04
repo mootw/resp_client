@@ -24,10 +24,11 @@ class RedisCommands {
   /// returns an empty map when the redis reply is empty
   Future<Map<String, String>> hgetall(String key) async =>
       _parse.asMap(await cmd.hgetall(key));
-  
+
   /// https://redis.io/commands/hmget/
   /// returns an empty map when the redis reply is empty
-  Future<List> hmget(String key, List<String> fields) async => await cmd.hmget(key, fields) as List;
+  Future<List> hmget(String key, List<String> fields) async =>
+      await cmd.hmget(key, fields) as List;
 
   /// https://redis.io/commands/geoadd/
   Future<int> geoadd(
@@ -41,18 +42,26 @@ class RedisCommands {
   /// https://redis.io/commands/geoadd/
   Future<List?> geosearchbylonlatbbox(
     String key,
-    double lon, double lat, double widthM, double heightM,) async =>
+    double lon,
+    double lat,
+    double widthM,
+    double heightM,
+  ) async =>
       await cmd.geosearchlonlatbbox(key, lon, lat, widthM, heightM) as List;
 
   /// https://redis.io/commands/exists/
   Future<int> exists(Iterable<String> keys) async =>
       await cmd.exists(keys) as int;
 
+  /// https://redis.io/commands/exists/
+  Future<List> smembers(String key) async => await cmd.smembers(key) as List;
+
   /// https://redis.io/commands/del/
   Future<int> del(Iterable<String> keys) async => await cmd.del(keys) as int;
 
   /// https://redis.io/commands/mget/
-  Future<List<Object?>> mget(Iterable<String> keys) async => await cmd.mget(keys) as List;
+  Future<List<Object?>> mget(Iterable<String> keys) async =>
+      await cmd.mget(keys) as List;
 
   /// https://redis.io/commands/hset/
   Future<int> hset(
@@ -77,8 +86,10 @@ class RedisCommands {
       await cmd.pexpire(key, duration, option) as int;
 
   /// https://redis.io/commands/scan/
-  Future<({int cursor, List<dynamic> results})> scan(int cursor, {String? pattern, int? count}) async =>
-      _parse.asScanResult(await cmd.scan(cursor, pattern: pattern, count: count));
+  Future<({int cursor, List<dynamic> results})> scan(int cursor,
+          {String? pattern, int? count}) async =>
+      _parse
+          .asScanResult(await cmd.scan(cursor, pattern: pattern, count: count));
 
   Transaction multi() => Transaction(cmd);
 
