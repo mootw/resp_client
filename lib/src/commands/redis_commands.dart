@@ -56,6 +56,10 @@ class RedisCommands {
   /// https://redis.io/commands/exists/
   Future<List> smembers(String key) async => await cmd.smembers(key) as List;
 
+
+  /// https://redis.io/commands/sadd/
+  Future<int> sadd(String key, List<String> members) async => await cmd.sadd(key, members) as int;
+
   /// https://redis.io/commands/del/
   Future<int> del(Iterable<String> keys) async => await cmd.del(keys) as int;
 
