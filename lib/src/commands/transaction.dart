@@ -94,7 +94,7 @@ class Transaction {
 
   void sadd(String key, Iterable<String> members) => _cmds.add((
         cmd: () => _redisMap.sadd(key, members),
-        parse: _parse.asMaybeString,
+        parse: _parse.asInt,
       ));
 
   void hset(
