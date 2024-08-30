@@ -6,16 +6,18 @@ part of resp_commands;
 /// vary depending on conditions, or even error if you send
 /// an exec without a multi call for instance. there
 /// is almost no safety here.
+/// Bulk Strings are NOT decoded here!!!
 class RedisCommandMap {
   RespClient client;
 
   RedisCommandMap(this.client);
 
-  Future<Object?> incr(String key) => client.sendCommand(['INCR', key]);
+  Future<Object?> incr(String key) => client.sendStringCommand(['INCR', key]);
 
-  Future<Object?> ttl(String key) => client.sendCommand(['TTL', key]);
+  Future<Object?> ttl(String key) => client.sendStringCommand(['TTL', key]);
 
-  Future<Object?> set(String key, String value, {bool? get, Duration? px}) =>
+  /// Usually a String or List<int> type for bytes
+  Future<Object?> set(String key, Object value, {bool? get, Duration? px}) =>
       client.sendCommand([
         'SET',
         key,
@@ -25,18 +27,18 @@ class RedisCommandMap {
         if (px != null) px.inMilliseconds.toString()
       ]);
 
-  Future<Object?> get(String key) => client.sendCommand(['GET', key]);
+  Future<Object?> get(String key) => client.sendStringCommand(['GET', key]);
 
   /// https://redis.io/commands/hgetall/
   /// returns an empty map when the redis reply is empty
-  Future<Object?> hgetall(String key) => client.sendCommand([
+  Future<Object?> hgetall(String key) => client.sendStringCommand([
         'HGETALL',
         key,
       ]);
 
   /// https://redis.io/commands/hgetall/
   /// returns an empty map when the redis reply is empty
-  Future<Object?> hmget(String key, Iterable<String> fields) => client.sendCommand([
+  Future<Object?> hmget(String key, Iterable<String> fields) => client.sendStringCommand([
         'HMGET',
         key,
         ...fields,
@@ -49,7 +51,7 @@ class RedisCommandMap {
     String? elementOption,
     bool? CH,
   ]) =>
-      client.sendCommand([
+      client.sendStringCommand([
         'GEOADD',
         key,
         if (elementOption != null) elementOption,
@@ -65,7 +67,7 @@ class RedisCommandMap {
   /// https://redis.io/commands/geoadd/
   Future<Object?> geosearchlonlatbbox(
           String key, double lon, double lat, double widthM, double heightM) =>
-      client.sendCommand([
+      client.sendStringCommand([
         'GEOSEARCH',
         key,
         'FROMLONLAT',
@@ -80,30 +82,30 @@ class RedisCommandMap {
   /// https://redis.io/commands/exists/
   Future<Object?> exists(Iterable<String> keys) {
     assert(keys.isNotEmpty);
-    return client.sendCommand(['EXISTS', ...keys]);
+    return client.sendStringCommand(['EXISTS', ...keys]);
   }
 
   /// https://redis.io/commands/del/
   Future<Object?> del(Iterable<String> keys) {
     assert(keys.isNotEmpty);
-    return client.sendCommand(['DEL', ...keys]);
+    return client.sendStringCommand(['DEL', ...keys]);
   }
 
   /// https://redis.io/commands/smembers/
   Future<Object?> smembers(String key) {
-    return client.sendCommand(['SMEMBERS', key]);
+    return client.sendStringCommand(['SMEMBERS', key]);
   }
 
   /// https://redis.io/commands/mget/
   Future<Object?> mget(Iterable<String> keys) {
     assert(keys.isNotEmpty);
-    return client.sendCommand(['MGET', ...keys]);
+    return client.sendStringCommand(['MGET', ...keys]);
   }
 
   /// https://redis.io/commands/hset/
   Future<Object?> hset(
     String key,
-    Map<String, String> entries,
+    Map<String, Object> entries,
   ) {
     assert(entries.isNotEmpty);
     return client.sendCommand([
@@ -119,7 +121,7 @@ class RedisCommandMap {
     Iterable<String> fields,
   ) {
     assert(fields.isNotEmpty);
-    return client.sendCommand([
+    return client.sendStringCommand([
       'HDEL',
       key,
       ...fields,
@@ -132,7 +134,7 @@ class RedisCommandMap {
     Iterable<String> members,
   ) {
     assert(members.isNotEmpty);
-    return client.sendCommand([
+    return client.sendStringCommand([
       'SADD',
       key,
       ...members,
@@ -145,7 +147,7 @@ class RedisCommandMap {
     Iterable<String> members,
   ) {
     assert(members.isNotEmpty);
-    return client.sendCommand([
+    return client.sendStringCommand([
       'SREM',
       key,
       ...members,
@@ -158,7 +160,7 @@ class RedisCommandMap {
     Duration duration, [
     String? option,
   ]) =>
-      client.sendCommand([
+      client.sendStringCommand([
         'PEXPIRE',
         key,
         duration.inMilliseconds.toString(),
@@ -166,7 +168,7 @@ class RedisCommandMap {
       ]);
 
   Future<Object?> scan(int cursor, {String? pattern, int? count}) {
-    return client.sendCommand([
+    return client.sendStringCommand([
       'SCAN',
       cursor.toString(),
       if (pattern != null) ...['MATCH', pattern],
@@ -174,20 +176,20 @@ class RedisCommandMap {
     ]);
   }
 
-  Future<Object?> multi() => client.sendCommand([
+  Future<Object?> multi() => client.sendStringCommand([
         'MULTI',
       ]);
 
-  Future<Object?> exec() => client.sendCommand([
+  Future<Object?> exec() => client.sendStringCommand([
         'EXEC',
       ]);
 
-  Future<Object?> watch(Iterable<String> keys) => client.sendCommand([
+  Future<Object?> watch(Iterable<String> keys) => client.sendStringCommand([
         'WATCH',
         ...keys,
       ]);
 
-  Future<Object?> unwatch() => client.sendCommand([
+  Future<Object?> unwatch() => client.sendStringCommand([
         'UNWATCH',
       ]);
 }

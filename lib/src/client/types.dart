@@ -1,17 +1,16 @@
 part of resp_client;
 
-class RespBulkString {
-  Iterable<int>? bytes;
-
-  RespBulkString(this.bytes);
-}
-
 /// Implementation of a RESP error.
 /// TODO make this a proper error type to return in the future..
 /// since this is a runtime error, etc.. etc.. have
 class RespError {
   final String message;
   const RespError(this.message);
+}
+
+class BinaryString {
+  final List<int> bytes;
+  
 }
 
 Future<Object?> deserializeRespType(StreamReader streamReader) async {
@@ -33,14 +32,14 @@ Future<Object?> deserializeRespType(StreamReader streamReader) async {
           utf8.decode(await streamReader.takeWhile((data) => data != _charCR)));
       await streamReader.takeCount(2);
       return payload;
-    case 0x24: // bulk string
+    case 0x24: // bulk string (returns List<int>)
       final length = int.parse(
           utf8.decode(await streamReader.takeWhile((data) => data != _charCR)));
       await streamReader.takeCount(2);
       if (length == -1) {
         return null; //null bulk string
       }
-      final payload = utf8.decode(await streamReader.takeCount(length));
+      final payload = await streamReader.takeCount(length);
       await streamReader.takeCount(2);
       return payload;
     case _asterisk: // array
@@ -72,7 +71,16 @@ final List<int> _colon = utf8.encode(':');
 final _nullBulkString = utf8.encode('\$-1');
 
 List<int> serializeObject(Object? object) {
-  if (object is String) {
+  if(object is List<int>) {
+    // It is binary data
+    return [
+      ..._dollar,
+      ...utf8.encode(object.length.toString()),
+      ..._CRLF,
+      ...object,
+      ..._CRLF
+    ];
+  } else if (object is String) {
     //serialize a string
     final encodedObject = utf8.encode(object);
     return [
@@ -88,18 +96,19 @@ List<int> serializeObject(Object? object) {
       ...utf8.encode(object.toString()),
       ..._CRLF,
     ];
-  } else if (object is RespBulkString) {
-    if (object.bytes == null) {
-      // TODO see if this is actually a null impl
-      return _respNullArray;
-    }
-    return [
-      ..._dollar,
-      ...utf8.encode(object.bytes!.length.toString()),
-      ..._CRLF,
-      ...object.bytes!,
-      ..._CRLF
-    ];
+    // TODO can implement Like this class to have a "byte-safe" string
+    // } else if (object is RespBulkString) {
+    // if (object.bytes == null) {
+    //   // TODO see if this is actually a null impl
+    //   return _respNullArray;
+    // }
+    // return [
+    //   ..._dollar,
+    //   ...utf8.encode(object.bytes!.length.toString()),
+    //   ..._CRLF,
+    //   ...object.bytes!,
+    //   ..._CRLF
+    // ];
   } else if (object is Iterable) {
     return [
       _asterisk,

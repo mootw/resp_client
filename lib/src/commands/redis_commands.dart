@@ -16,7 +16,16 @@ class RedisCommands {
           {bool? get, Duration? px}) async =>
       await cmd.set(key, value, get: get, px: px) as String?;
 
-  Future<String?> get(String key) async => await cmd.get(key) as String?;
+  /// Can return String, potentially List<int>
+  Future<Object?> setBytes(String key, List<int> value,
+          {bool? get, Duration? px}) async =>
+      await cmd.set(key, value, get: get, px: px);
+
+  Future<String?> get(String key) async =>
+      _parse.decodeUtf8(await cmd.get(key) as List<int>?);
+
+  Future<List<int>?> getBytes(String key) async =>
+      await cmd.get(key) as List<int>?;
 
   Future<int> incr(String key) async => await cmd.incr(key) as int;
 
@@ -56,9 +65,9 @@ class RedisCommands {
   /// https://redis.io/commands/exists/
   Future<List> smembers(String key) async => await cmd.smembers(key) as List;
 
-
   /// https://redis.io/commands/sadd/
-  Future<int> sadd(String key, List<String> members) async => await cmd.sadd(key, members) as int;
+  Future<int> sadd(String key, List<String> members) async =>
+      await cmd.sadd(key, members) as int;
 
   /// https://redis.io/commands/del/
   Future<int> del(Iterable<String> keys) async => await cmd.del(keys) as int;

@@ -8,13 +8,9 @@ class RespClient {
   final StreamReader _streamReader;
   final Queue<Completer> _pendingResponses = Queue();
   bool _isProccessingResponse = false;
-
-  RespClient(this._connection)
-      : _streamReader = StreamReader(_connection);
-
-  
   Queue sendQueue = Queue();
 
+  RespClient(this._connection) : _streamReader = StreamReader(_connection);
 
   ///
   /// Writes a Object to the server using the
@@ -23,7 +19,7 @@ class RespClient {
   /// [inputStream] of the underlying server connection.
   /// the type of the response will vary. see: types.dart
   ///
-  Future<Object?> sendObject(Object data) {
+  Future<Object?> sendCommand(Object data) {
     final completer = Completer<Object?>();
     _pendingResponses.add(completer);
     _connection.add(serializeObject(data));
@@ -33,8 +29,7 @@ class RespClient {
 
   /// type wrapper for sendObject that ensures that only strings
   /// are sent to the redis connection (redis expects a list of bulk strings)
-  Future<Object?> sendCommand(Iterable<String> data) => sendObject(data);
-  
+  Future<Object?> sendStringCommand(Iterable<String> data) => sendCommand(data);
 
   Stream<Object?> subscribe() {
     final controller = StreamController<Object?>();
@@ -43,6 +38,8 @@ class RespClient {
     });
     return controller.stream;
   }
+
+  Future close () => _connection.close();
 
   void _processResponse(bool selfCall) {
     if (_isProccessingResponse == false || selfCall) {

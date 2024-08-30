@@ -1,58 +1,74 @@
 import 'dart:async';
 
 import 'package:resp_client/resp_client.dart';
+import 'package:resp_client/resp_commands.dart';
+import 'package:resp_client/resp_server.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late StreamController<List<int>> streamController;
-  late StreamReader streamReader;
+  late final RedisCommands commands;
 
-  setUp(() {
-    streamController = StreamController();
-    streamReader = StreamReader(streamController.stream);
+  setUp(() async {
+    commands = RedisCommands(
+      RedisCommandMap(
+        RespClient(
+          await connectSocket('172.17.0.2', port: 6379),
+        ),
+      ),
+    );
   });
 
-  test('tests (de)serialize of a simple string', () async {
-    final simpleString = RespSimpleString('abcØØhehe');
-    streamController.add(simpleString.serialize());
-    final result = await serializeObject(streamReader);
-    expect(result.payload, equals('abcØØhehe'));
+  tearDown(() {
+    commands.cmd.client.close();
   });
 
-  test('tests (de)serialize of a bulk string', () async {
-    final simpleString = RespBulkString('abcØØhehe');
-    streamController.add(simpleString.serialize());
-    final result = await serializeObject(streamReader);
-    expect(result.payload, equals('abcØØhehe'));
+  test('set get string', () async {
+    await commands.set('someKey', 'someValue');
+    final result = await commands.get('someKey');
+    expect(result, equals('someValue'));
   });
 
-  test('tests (de)serialize of an error', () async {
-    final simpleString = RespError('abcØØhehe');
-    streamController.add(simpleString.serialize());
-    final result = await serializeObject(streamReader);
-    expect(result.payload, equals('abcØØhehe'));
+  test('get null string', () async {
+    expect(await commands.get('null key'), equals(null));
   });
 
-  test('tests (de)serialize of an integer', () async {
-    final simpleString = RespInteger(1910);
-    streamController.add(simpleString.serialize());
-    final result = await serializeObject(streamReader);
-    expect(result.payload, equals(1910));
+  // This test could be flakey with bad network conditions
+  test('test Expires', () async {
+    await commands.set('anotherkey', 'someValue',
+        px: Duration(milliseconds: 500));
+    expect(await commands.get('anotherkey'), equals('someValue'));
+    await Future.delayed(Duration(seconds: 1));
+    expect(await commands.get('anotherkey'), equals(null));
   });
 
-  test('tests (de)serialize of an array', () async {
-    final simpleString = RespArray([
-      RespInteger(1910),
-      RespBulkString('bülk'),
-      RespSimpleString('simple'),
-      RespError('error'),
-    ]);
-    streamController.add(simpleString.serialize());
-    final result = await serializeObject(streamReader) as RespArray;
-    expect(result.payload, hasLength(4));
-    expect(result.payload?[0].payload, equals(1910));
-    expect(result.payload?[1].payload, equals('bülk'));
-    expect(result.payload?[2].payload, equals('simple'));
-    expect(result.payload?[3].payload, equals('error'));
+  test('set bytes', () async {
+    final bytes = <int>[
+      for (int i = 0; i < 256; i++) i,
+    ];
+    await commands.setBytes('testBinary', bytes);
+    expect(await commands.getBytes('testBinary'), equals(bytes));
+  });
+
+  test('set bytes return', () async {
+    final bytes = <int>[
+      for (int i = 0; i < 256; i++) i,
+    ];
+    final result = await commands.setBytes('testBinary', bytes, get: true);
+    expect(result, equals(bytes));
+  });
+
+  test('set bytes return', () async {
+    final bytes = <int>[
+      for (int i = 0; i < 256; i++) i,
+    ];
+    final result = await commands.setBytes('testBinary', bytes, get: true);
+    expect(result, equals(bytes));
+  });
+
+  test('set get maps', () async {
+    final testMap = {'a': '123', 'b': 'cows'};
+    await commands.hset('map', testMap);
+    final result = await commands.hgetall('map');
+    expect(result, equals(testMap));
   });
 }

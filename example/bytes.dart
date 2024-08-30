@@ -4,6 +4,11 @@ import 'package:resp_client/resp_server.dart';
 
 void main(List<String> args) async {
 
+  final bytes = <int>[
+    for(int i = 0; i < 256; i++)
+    i,
+  ];
+
   final commands = RedisCommands(
       RedisCommandMap(
         RespClient(
@@ -12,16 +17,13 @@ void main(List<String> args) async {
       ),
     );
 
-  final transaction = commands.multi();
-  transaction.incr('someCoolKey');
-  transaction.pexpire(
-    'someCoolKey',
-    const Duration(days: 2),
-  );
-  final result = await transaction.exec();
-  final incrResult = result[0]! as int;
+    await commands.setBytes('testBinary', bytes);
 
-  print(incrResult);
+    final after = await commands.getBytes('testBinary');
+    print(after);
+
+    final b = await commands.getBytes('null key');
+    print(b);
 
   // close connection to the server
   await commands.cmd.client.close();

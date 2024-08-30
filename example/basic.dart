@@ -3,18 +3,26 @@ import 'package:resp_client/resp_commands.dart';
 import 'package:resp_client/resp_server.dart';
 
 void main(List<String> args) async {
-  // create a server connection using sockets
-  final server = await connectSocket('localhost');
 
-  // create a client using the server connection
-  final client = RespClient(server);
+  final commands = RedisCommands(
+      RedisCommandMap(
+        RespClient(
+          await connectSocket('172.17.0.2', port: 6379),
+        ),
+      ),
+    );
 
-  final commands = RespCommandsTier0(client);
+    await commands.set(
+        'myKey',
+        'THE VALUE OF MY KEY!',
+        px: const Duration(hours: 8),
+      );
 
   // execute a command
-  final result = await commands.execute(['GET', 'myKey', 'NX']);
-  print(result.payload);
+  final result = await commands.cmd.client.sendStringCommand(['GET', 'myKey']);
+
+  print(result.toString());
 
   // close connection to the server
-  await server.close();
+  await commands.cmd.client.close();
 }
