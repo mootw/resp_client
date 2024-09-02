@@ -63,8 +63,8 @@ class RedisCommandMap {
         ],
       ]);
 
-  /// TODO create generic implementation
-  /// https://redis.io/commands/geoadd/
+
+  /// Returns BinaryString Lists
   Future<Object?> geosearchlonlatbbox(
           String key, double lon, double lat, double widthM, double heightM) =>
       client.sendStringCommand([

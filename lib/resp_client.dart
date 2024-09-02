@@ -4,9 +4,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:resp_client/resp_server.dart';
+import 'package:collection/collection.dart';
 
 part 'package:resp_client/src/client/resp_client.dart';
 part 'package:resp_client/src/client/stream_reader.dart';

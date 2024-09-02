@@ -8,9 +8,23 @@ class RespError {
   const RespError(this.message);
 }
 
+/// Redis Bulk String
 class BinaryString {
   final List<int> bytes;
-  
+
+  BinaryString(this.bytes);
+
+  BinaryString.fromString(String string) : bytes = utf8.encode(string);
+
+  @override
+  String toString() => utf8.decode(bytes);
+
+  /// Implicitly have binary string return its toString method when accessed
+  String call() => toString();
+
+  @override
+  bool operator ==(Object other) =>
+      other is BinaryString && ListEquality().equals(bytes, other.bytes);
 }
 
 Future<Object?> deserializeRespType(StreamReader streamReader) async {
@@ -32,14 +46,14 @@ Future<Object?> deserializeRespType(StreamReader streamReader) async {
           utf8.decode(await streamReader.takeWhile((data) => data != _charCR)));
       await streamReader.takeCount(2);
       return payload;
-    case 0x24: // bulk string (returns List<int>)
+    case 0x24: // bulk string
       final length = int.parse(
           utf8.decode(await streamReader.takeWhile((data) => data != _charCR)));
       await streamReader.takeCount(2);
       if (length == -1) {
         return null; //null bulk string
       }
-      final payload = await streamReader.takeCount(length);
+      final payload = BinaryString(await streamReader.takeCount(length));
       await streamReader.takeCount(2);
       return payload;
     case _asterisk: // array
@@ -71,7 +85,7 @@ final List<int> _colon = utf8.encode(':');
 final _nullBulkString = utf8.encode('\$-1');
 
 List<int> serializeObject(Object? object) {
-  if(object is List<int>) {
+  if (object is List<int>) {
     // It is binary data
     return [
       ..._dollar,
@@ -96,8 +110,7 @@ List<int> serializeObject(Object? object) {
       ...utf8.encode(object.toString()),
       ..._CRLF,
     ];
-    // TODO can implement Like this class to have a "byte-safe" string
-    // } else if (object is RespBulkString) {
+    // } else if (object is BinaryString) {
     // if (object.bytes == null) {
     //   // TODO see if this is actually a null impl
     //   return _respNullArray;

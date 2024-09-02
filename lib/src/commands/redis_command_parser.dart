@@ -2,30 +2,24 @@ part of resp_commands;
 
 ///Opinionated parsing/typing for redis command responses
 class RedisCommandParser {
-
-  String? decodeUtf8(List<int>? bytes) =>
-      bytes == null ? null : utf8.decode(bytes);
-
   int asInt(Object? response) => response as int;
 
   List asList(Object? response) => response as List;
 
-  String? asMaybeString(Object? response) => decodeUtf8(response as List<int>?);
+  String? asMaybeString(Object? response) => response?.toString();
 
   Map<String, String> asMap(Object? response) {
     final list = response as List;
     final entries = <MapEntry<String, String>>[];
     for (var i = 0; i < list.length; i += 2) {
-      entries.add(MapEntry(list[i] as String, list[i + 1] as String));
+      entries.add(MapEntry(list[i].toString(), list[i + 1].toString()));
     }
     return Map<String, String>.fromEntries(entries);
   }
 
-  ({int cursor, List<dynamic> results}) asScanResult(Object? response) {
-    final list = response as List;
-    return (
-      cursor: int.parse(list[0]),
-      results: list[1],
-    );
-  }
+  ({int cursor, List<String> results}) asScanResult(List list) => (
+        cursor: int.parse(list[0].toString()),
+        results:
+            List<BinaryString>.from(list[1]).map((e) => e.toString()).toList(),
+      );
 }
