@@ -35,7 +35,7 @@ class RedisCommands {
 
   /// https://redis.io/commands/hmget/
   /// returns an empty map when the redis reply is empty
-  Future<List> hmget(String key, List<String> fields) async =>
+  Future<List<String>> hmget(String key, List<String> fields) async =>
       (await cmd.hmget(key, fields) as List).map((e) => e.toString()).toList();
 
   /// https://redis.io/commands/geoadd/
