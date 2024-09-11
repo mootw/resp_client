@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:convert';
 
 import 'package:resp_client/resp_client.dart';
 import 'package:resp_client/resp_commands.dart';
@@ -13,7 +13,7 @@ void main() {
     commands = RedisCommands(
       RedisCommandMap(
         RespClient(
-          await connectSocket('172.17.0.2', port: 6379),
+          await connectSocket('172.22.0.6', port: 6379),
         ),
       ),
     );
@@ -23,14 +23,12 @@ void main() {
     commands.cmd.client.close();
   });
 
-
-  test('set get', () async {
+  test('mget', () async {
     await commands.set('key1', 'value1');
     await commands.set('key2', 'value2');
-    await commands.setBytes('key3', [0, 255]);
+    await commands.setBytes('key3', utf8.encode('cows'));
     final result = await commands.mget(['key1', 'key2', 'key3']);
-
-    expect(result, equals('someValue'));
+    expect(result, equals(['value1', 'value2', 'cows']));
   });
 
   test('set get', () async {
