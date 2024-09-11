@@ -4,7 +4,8 @@ part of resp_commands;
 class RedisCommandParser {
   int asInt(Object? response) => response as int;
 
-  List asList(Object? response) => response as List;
+  List<String>? asStringList(Object? response) =>
+      (response as List?)?.map((e) => e.toString()).toList();
 
   String? asMaybeString(Object? response) => response?.toString();
 

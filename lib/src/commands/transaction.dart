@@ -69,7 +69,7 @@ class Transaction {
 
   void hmget(String key, List<String> fields) => _cmds.add((
         cmd: () => _redisMap.hmget(key, fields),
-        parse: _parse.asList,
+        parse: _parse.asStringList,
       ));
 
   void exists(List<String> keys) => _cmds.add((
