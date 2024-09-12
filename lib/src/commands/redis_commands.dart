@@ -76,7 +76,7 @@ class RedisCommands {
   Future<int> del(Iterable<String> keys) async => await cmd.del(keys) as int;
 
   /// https://redis.io/commands/mget/
-  Future<List<Object?>> mget(Iterable<String> keys) async =>
+  Future<List<String?>> mget(Iterable<String> keys) async =>
       (await cmd.mget(keys) as List).map((e) => e?.toString()).toList();
 
   /// https://redis.io/commands/hset/
