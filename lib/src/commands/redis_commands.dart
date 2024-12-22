@@ -79,6 +79,19 @@ class RedisCommands {
       (await cmd.geosearchlonlatbbox(key, lon, lat, widthM, heightM) as List)
           .map((e) => (e as BinaryString).bytes)
           .toList();
+    
+
+      /// https://redis.io/commands/geosearch/
+  Future<List<List<int>>> georadius(
+    String key,
+    double lon,
+    double lat,
+    double radiusM,
+
+  ) async =>
+      (await cmd.georadius(key, lon, lat, radiusM) as List)
+          .map((e) => (e as BinaryString).bytes)
+          .toList();
 
   /// https://redis.io/commands/exists/
   Future<int> exists(Iterable<String> keys) async =>

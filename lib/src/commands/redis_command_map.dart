@@ -98,6 +98,18 @@ class RedisCommandMap {
         heightM.toString(),
         'm',
       ]);
+  
+    /// Returns BinaryString Lists
+  Future<Object?> georadius(
+          String key, double lon, double lat, double radiusM) =>
+      client.sendCommand([
+        'GEORADIUS',
+        key,
+        lon.toString(),
+        lat.toString(),
+        radiusM.toString(),
+        'm',
+      ]);
 
   /// https://redis.io/commands/exists/
   Future<Object?> exists(Iterable<String> keys) {
