@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:resp_client/resp_client.dart';
 import 'package:resp_client/resp_commands.dart';
@@ -13,7 +14,7 @@ void main() {
     commands = RedisCommands(
       RedisCommandMap(
         RespClient(
-          await connectSocket('172.22.0.6', port: 6379),
+          await connectSocket('127.0.0.1', port: 6379),
         ),
       ),
     );
@@ -126,5 +127,28 @@ void main() {
     // remove the keys
     final delResult = await commands.del(keys);
     expect(delResult, equals(keys.length));
+  });
+
+  test('geoadd geosearch bytes', () async {
+    final bytes = <int>[
+      for (int i = 0; i < 256; i++) i,
+    ];
+    await commands.geoaddBytes('geoadd-bytes', [
+      (latitude: 0, longitude: 0, member: utf8.encode('hi')),
+      (latitude: 10, longitude: 10, member: bytes)
+    ]);
+    expect(
+        await commands.geosearchbylonlatbboxBytes(
+            'geoadd-bytes', 0, 0, 1000, 1000),
+        [utf8.encode('hi')]);
+    expect(
+        await commands.geosearchbylonlatbboxBytes(
+            'geoadd-bytes', 10, 10, 1000, 1000),
+        [bytes]);
+
+    expect(
+        await commands.geosearchbylonlatbboxBytes(
+            'geoadd-bytes', 24, 24, 1000, 1000),
+        []);
   });
 }

@@ -64,6 +64,26 @@ class RedisCommandMap {
       ]);
 
 
+  /// https://redis.io/commands/geoadd/
+  Future<Object?> geoaddBytes(
+    String key,
+    Iterable<({double longitude, double latitude, List<int> member})> items, [
+    String? elementOption,
+    bool? CH,
+  ]) =>
+      client.sendCommand([
+        'GEOADD',
+        key,
+        if (elementOption != null) elementOption,
+        if (CH == true) 'CH',
+        for (final item in items) ...[
+          item.longitude.toString(),
+          item.latitude.toString(),
+          item.member,
+        ],
+      ]);
+
+
   /// Returns BinaryString Lists
   Future<Object?> geosearchlonlatbbox(
           String key, double lon, double lat, double widthM, double heightM) =>

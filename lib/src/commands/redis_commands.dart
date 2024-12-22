@@ -48,7 +48,15 @@ class RedisCommands {
       await cmd.geoadd(key, items, elementOption, CH) as int;
 
   /// https://redis.io/commands/geoadd/
-  ///
+  Future<int> geoaddBytes(
+    String key,
+    List<({double longitude, double latitude, List<int> member})> items, [
+    String? elementOption,
+    bool? CH,
+  ]) async =>
+      await cmd.geoaddBytes(key, items, elementOption, CH) as int;
+
+  /// https://redis.io/commands/geosearch/
   Future<List> geosearchbylonlatbbox(
     String key,
     double lon,
@@ -58,6 +66,18 @@ class RedisCommands {
   ) async =>
       (await cmd.geosearchlonlatbbox(key, lon, lat, widthM, heightM) as List)
           .map((e) => e.toString())
+          .toList();
+
+  /// https://redis.io/commands/geosearch/
+  Future<List<List<int>>> geosearchbylonlatbboxBytes(
+    String key,
+    double lon,
+    double lat,
+    double widthM,
+    double heightM,
+  ) async =>
+      (await cmd.geosearchlonlatbbox(key, lon, lat, widthM, heightM) as List)
+          .map((e) => (e as BinaryString).bytes)
           .toList();
 
   /// https://redis.io/commands/exists/
