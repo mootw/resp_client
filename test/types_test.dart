@@ -32,6 +32,19 @@ void main() {
     expect(result, equals(['value1', 'value2', 'cows']));
   });
 
+    test('mgetbytes', () async {
+    final bytes = [
+      for(int i = 0; i < 255; i++)
+        i,
+    ];
+    await commands.setBytes('key1', bytes);
+    await commands.setBytes('key2', [1]);
+    await commands.setBytes('key3', utf8.encode('cows'));
+    final result = await commands.mgetBytes(['key1', 'key2', 'key3']);
+    expect(result, equals([bytes, [1], utf8.encode('cows')]));
+  });
+
+
   test('set get', () async {
     await commands.set('someKey', 'someValue');
     final result = await commands.get('someKey');

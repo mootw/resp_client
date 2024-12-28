@@ -1,7 +1,6 @@
 library resp_commands;
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:resp_client/resp_client.dart';
 

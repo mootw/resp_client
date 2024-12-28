@@ -112,6 +112,10 @@ class RedisCommands {
   Future<List<String?>> mget(Iterable<String> keys) async =>
       (await cmd.mget(keys) as List).map((e) => e?.toString()).toList();
 
+  /// https://redis.io/commands/mget/
+  Future<List<List<int>?>> mgetBytes(Iterable<String> keys) async =>
+      (await cmd.mget(keys) as List).map((e) => (e as BinaryString?)?.bytes).toList();
+
   /// https://redis.io/commands/hset/
   Future<int> hset(
     String key,
